@@ -4,35 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chamados</title>
-<style>
-  :root { --bg:#f4f6f8; --tx:#1c2430; --mut:#667085; --ac:#2f5bd9; --usr:#e3e9f4; --bd:#d5dbe5; --card:#fff; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#161b22; --tx:#e6ebf2; --mut:#8b96a8; --ac:#6d8cf5; --usr:#242d3b; --bd:#2c3646; --card:#1d242e; }
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body { background: var(--bg); color: var(--tx); font: 16px/1.55 "Segoe UI", system-ui, sans-serif;
-         display: flex; flex-direction: column; }
-  header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--bd); }
-  header b { font-weight: 600; }
-  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--bd); background: var(--card); color: var(--tx); padding: 6px 12px; }
-  button:focus-visible { outline: 2px solid var(--ac); outline-offset: 2px; }
-  #msgs { flex: 1; overflow-y: auto; padding: 20px 16px; }
-  .col { max-width: 760px; margin: 0 auto; }
-  .m { margin: 0 0 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .m.u { background: var(--usr); padding: 10px 14px; border-radius: 14px; margin-left: 15%; }
-  .m.e { color: #c0392b; }
-  .info { color: var(--mut); font-size: 14px; margin: -8px 0 14px; }
-  .vazio { color: var(--mut); text-align: center; margin-top: 18vh; }
-  footer { padding: 12px 16px 16px; border-top: 1px solid var(--bd); }
-  .linha { display: flex; gap: 8px; align-items: flex-end; }
-  textarea { flex: 1; resize: none; font: inherit; color: var(--tx); background: var(--card);
-             border: 1px solid var(--bd); border-radius: 12px; padding: 10px 12px; max-height: 200px; }
-  #enviar { background: var(--ac); color: #fff; border-color: var(--ac); }
-  #parar { display: none; }
-  #status { color: var(--mut); font-size: 14px; height: 20px; }
-  #autor { color: var(--mut); font-size: 14px; margin-right: 12px; }
-</style>
+<link rel="stylesheet" href="site.css">
 </head>
 <body>
 <header><b>Chamados</b><div><span id="autor"></span><button id="nova">Nova conversa</button></div></header>
@@ -45,64 +17,6 @@
     <button id="parar">Parar</button>
   </div>
 </div></footer>
-<script>
-const $ = (id) => document.getElementById(id);
-const col = $('col'), msgs = $('msgs'), txt = $('txt');
-let ocupado = false;
-
-function add(cls, texto) {
-  $('vazio')?.remove();
-  const d = document.createElement('div');
-  d.className = 'm ' + cls; d.textContent = texto || '';
-  col.appendChild(d); msgs.scrollTop = msgs.scrollHeight; return d;
-}
-function estado(on, msg) {
-  ocupado = on; $('enviar').style.display = on ? 'none' : '';
-  $('parar').style.display = on ? '' : 'none'; $('status').textContent = msg || '';
-}
-txt.addEventListener('input', () => { txt.style.height = 'auto'; txt.style.height = txt.scrollHeight + 'px'; });
-txt.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); } });
-$('enviar').onclick = enviar;
-$('parar').onclick = () => fetch('/api/parar', { method: 'POST' });
-$('nova').onclick = async () => {
-  await fetch('/api/nova', { method: 'POST' });
-  col.innerHTML = '<p class="vazio" id="vazio">Descreva o atendimento para começar.</p>'; estado(false);
-};
-
-async function enviar() {
-  const mensagem = txt.value.trim();
-  if (!mensagem || ocupado) return;
-  txt.value = ''; txt.style.height = 'auto';
-  add('u', mensagem); estado(true, 'Gemini está processando…');
-  let resp = null, interrompido = true;
-  try {
-    const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensagem }) });
-    if (!r.ok) throw new Error(await r.text() || 'Erro ' + r.status);
-    const leitor = r.body.getReader(), dec = new TextDecoder(); let buf = '';
-    for (;;) {
-      const { done, value } = await leitor.read(); if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let i;
-      while ((i = buf.indexOf('\n')) >= 0) {
-        const linha = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (!linha) continue;
-        const ev = JSON.parse(linha);
-        if (ev.type === 'message' && ev.role === 'assistant') {
-          if (!resp) resp = add('a', '');
-          resp.textContent += ev.content || ''; msgs.scrollTop = msgs.scrollHeight;
-        } else if (ev.type === 'tool_use') {
-          const f = ev.parameters && (ev.parameters.file_path || ev.parameters.dir_path || ev.parameters.pattern || '');
-          estado(true, 'Consultando: ' + (f || ev.tool_name)); resp = null;
-        } else if (ev.type === 'fim') {
-          interrompido = false;
-          if (ev.code) add('e', ev.erro || 'O Gemini terminou com erro (código ' + ev.code + ').');
-        }
-      }
-    }
-  } catch (e) { add('e', e.message); interrompido = false; }
-  if (interrompido) add('info', 'Execução interrompida.');
-  estado(false); txt.focus();
-}
-fetch('/api/info').then(r => r.json()).then(i => { $('autor').textContent = i.usuario; });
-</script>
+<script src="script.js"></script>
 </body>
 </html>
