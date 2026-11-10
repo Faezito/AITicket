@@ -1,8 +1,9 @@
 {
-  "workDir": "C:\\Chamados",
+  "workDir": "C:\\Users\\matheus.fae\\Documents\\Chamados",
   "port": 3000,
-  "apiKey": "00241864dfdfsdfdssf000",
-  "model": "gemini-3.5-flash-lite",
-  "skipTrust": false,
-  "usuario": "Matheus"
+  "usuario": "Matheus Fae",
+  "provider": "gemini",
+  "apiKey": "",
+  "model": "gemini-2.5-flash",
+  "baseUrl": ""
 }

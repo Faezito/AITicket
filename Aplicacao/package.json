@@ -1,7 +1,0 @@
-{
-  "name": "chamados-gemini",
-  "version": "0.2.0",
-  "private": true,
-  "description": "Chat local para organizar chamados técnicos usando o Gemini CLI",
-  "scripts": { "start": "node server.js", "teste": "node teste-gemini.js" }
-}
