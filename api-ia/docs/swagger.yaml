@@ -1,0 +1,119 @@
+basePath: /
+definitions:
+  dtos.AskRequest:
+    properties:
+      model:
+        type: string
+      question:
+        type: string
+      request_id:
+        type: string
+    type: object
+  dtos.AskResponse:
+    properties:
+      answer:
+        type: string
+      duration_ms:
+        type: integer
+      model:
+        type: string
+      request_id:
+        type: string
+    type: object
+  dtos.CancelRequest:
+    properties:
+      request_id:
+        type: string
+    type: object
+  dtos.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Matheus
+  description: API para comunicação com modelos de IA locais através do Ollama.
+  license:
+    name: MIT
+  termsOfService: http://swagger.io/terms/
+  title: AI Ticket API
+  version: "1.0"
+paths:
+  /api/ask:
+    post:
+      consumes:
+      - application/json
+      description: Envia uma pergunta para o modelo local através do Ollama e retorna
+        a resposta gerada.
+      parameters:
+      - description: Dados da solicitação
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resposta gerada com sucesso
+          schema:
+            $ref: '#/definitions/dtos.AskResponse'
+        "400":
+          description: JSON inválido ou campos obrigatórios ausentes
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "409":
+          description: Request ID já está em uso
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "499":
+          description: Geração cancelada
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "502":
+          description: Erro na comunicação com Ollama
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "504":
+          description: Tempo limite excedido
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Enviar pergunta para IA
+      tags:
+      - AI
+  /api/cancel:
+    post:
+      consumes:
+      - application/json
+      description: Cancela uma geração em andamento com base no Request ID.
+      parameters:
+      - description: Identificador da requisição
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CancelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Geração cancelada
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Request ID obrigatório
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Nenhuma geração em andamento com esse ID
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Cancelar requisição
+      tags:
+      - AI
+swagger: "2.0"
