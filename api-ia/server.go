@@ -13,7 +13,7 @@ const (
 
 type Server struct {
 	registry     *Registry
-	httpClient   http.Client
+	httpClient   *http.Client
 	systemPrompt string
 }
 

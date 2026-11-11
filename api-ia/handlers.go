@@ -1,13 +1,13 @@
 package main
 
 import (
+	"api-ia/dtos"
 	"context"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"time"
-	"api-ia/dtos"
 )
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -17,15 +17,15 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request) {
-	var req AskRequest
+	var req dtos.AskRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, ErrorResponse{"JSON inválido"})
+		writeJSON(w, http.StatusBadRequest, dtos.ErrorResponse{"JSON inválido"})
 		return
 	}
 
 	if req.RequestID == "" || req.Question == "" {
-		writeJSON(w, http.StatusBadRequest, ErrorResponse{
+		writeJSON(w, http.StatusBadRequest, dtos.ErrorResponse{
 			"request_id e question são obrigatórios",
 		})
 		return
@@ -39,7 +39,7 @@ func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	if !s.registry.Add(req.RequestID, cancel) {
-		writeJSON(w, http.StatusConflict, ErrorResponse{
+		writeJSON(w, http.StatusConflict, dtos.ErrorResponse{
 			"request_id já em uso",
 		})
 		return
@@ -53,19 +53,19 @@ func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, context.Canceled):
-			writeJSON(w, 499, ErrorResponse{"geração cancelada"})
+			writeJSON(w, 499, dtos.ErrorResponse{"geração cancelada"})
 
 		case errors.Is(err, context.DeadlineExceeded):
-			writeJSON(w, http.StatusGatewayTimeout, ErrorResponse{"tempo esgotado"})
+			writeJSON(w, http.StatusGatewayTimeout, dtos.ErrorResponse{"tempo esgotado"})
 
 		default:
 			log.Printf("erro Ollama: %v", err)
-			writeJSON(w, http.StatusBadGateway, ErrorResponse{err.Error()})
+			writeJSON(w, http.StatusBadGateway, dtos.ErrorResponse{err.Error()})
 		}
 		return
 	}
 
-	writeJSON(w, http.StatusOK, AskResponse{
+	writeJSON(w, http.StatusOK, dtos.AskResponse{
 		RequestID:  req.RequestID,
 		Answer:     answer,
 		Model:      req.Model,
@@ -74,17 +74,17 @@ func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCancel(w http.ResponseWriter, r *http.Request) {
-	var req CancelRequest
+	var req dtos.CancelRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.RequestID == "" {
-		writeJSON(w, http.StatusBadRequest, ErrorResponse{
+		writeJSON(w, http.StatusBadRequest, dtos.ErrorResponse{
 			"request_id obrigatório",
 		})
 		return
 	}
 
 	if !s.registry.Cancel(req.RequestID) {
-		writeJSON(w, http.StatusNotFound, ErrorResponse{
+		writeJSON(w, http.StatusNotFound, dtos.ErrorResponse{
 			"nenhuma geração em andamento com esse id",
 		})
 		return

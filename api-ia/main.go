@@ -1,9 +1,22 @@
 package main
 
+// @title           AI Ticket API
+// @version         1.0
+// @description     API para comunicação com modelos de IA locais através do Ollama.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Matheus
+// @license.name   MIT
+
+// @host      localhost:8080
+// @BasePath  /
+
 import (
 	"log"
 	"net/http"
 	"os"
+    _ "api-ia/docs"
+    httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
@@ -20,7 +33,9 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-
+	
+	mux.Handle("GET /swagger/", httpSwagger.Handler())
+	
 	mux.HandleFunc("POST /api/ask", srv.handleAsk)
 	mux.HandleFunc("POST /api/cancel", srv.handleCancel)
 
