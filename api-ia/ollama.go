@@ -12,6 +12,7 @@ import (
 func (s *Server) callOllama(ctx context.Context, req dtos.AskRequest) (string, error) {
 	msgs := []dtos.OllamaMessage{}
 
+	// System Prompt: define o comportamento da IA.
 	if s.systemPrompt != "" {
 		msgs = append(msgs, dtos.OllamaMessage{
 			Role:    "system",
@@ -19,6 +20,15 @@ func (s *Server) callOllama(ctx context.Context, req dtos.AskRequest) (string, e
 		})
 	}
 
+	// Contexto: fornece conhecimento adicional à IA.
+	if s.context != "" {
+		msgs = append(msgs, dtos.OllamaMessage{
+			Role:    "system",
+			Content: "Abaixo estão informações de contexto para auxiliar nas respostas:\n\n" + s.context,
+		})
+	}
+
+	// Pergunta do usuário.
 	msgs = append(msgs, dtos.OllamaMessage{
 		Role:    "user",
 		Content: req.Question,

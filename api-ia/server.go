@@ -15,6 +15,7 @@ type Server struct {
 	registry     *Registry
 	httpClient   *http.Client
 	systemPrompt string
+	context      string
 }
 
 func NewServer() *Server {

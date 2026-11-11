@@ -6,36 +6,42 @@ package main
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   Matheus
-// @license.name   MIT
 
 // @host      localhost:8080
 // @BasePath  /
 
 import (
+	_ "api-ia/docs"
 	"log"
 	"net/http"
 	"os"
-    _ "api-ia/docs"
-    httpSwagger "github.com/swaggo/http-swagger"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
 	srv := NewServer()
 
-	// Carrega system prompt, se configurado.
-	if path := os.Getenv("SYSTEM_PROMPT_FILE"); path != "" {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			log.Fatalf("não foi possível ler %s: %v", path, err)
-		}
-
-		srv.systemPrompt = string(data)
+	// Carrega System Prompt
+	systemPrompt, err := os.ReadFile("prompts/SystemPrompt.md")
+	if err != nil {
+		log.Fatalf("não foi possível ler SystemPrompt.md: %v", err)
 	}
 
+	srv.systemPrompt = string(systemPrompt)
+
+	// Carrega Contexto
+	context, err := os.ReadFile("context/Context.md")
+	if err != nil {
+		log.Fatalf("não foi possível ler Context.md: %v", err)
+	}
+
+	srv.context = string(context)
+
 	mux := http.NewServeMux()
-	
+
 	mux.Handle("GET /swagger/", httpSwagger.Handler())
-	
+
 	mux.HandleFunc("POST /api/ask", srv.handleAsk)
 	mux.HandleFunc("POST /api/cancel", srv.handleCancel)
 
