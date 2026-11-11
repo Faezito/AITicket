@@ -13,9 +13,6 @@ const docTemplate = `{
         "contact": {
             "name": "Matheus"
         },
-        "license": {
-            "name": "MIT"
-        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -23,7 +20,7 @@ const docTemplate = `{
     "paths": {
         "/api/ask": {
             "post": {
-                "description": "Envia uma pergunta para o modelo local através do Ollama e retorna a resposta gerada.",
+                "description": "Envia uma pergunta para o modelo local através do Ollama.",
                 "consumes": [
                     "application/json"
                 ],

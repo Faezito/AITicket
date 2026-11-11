@@ -7,9 +7,6 @@
         "contact": {
             "name": "Matheus"
         },
-        "license": {
-            "name": "MIT"
-        },
         "version": "1.0"
     },
     "host": "localhost:8080",
@@ -17,7 +14,7 @@
     "paths": {
         "/api/ask": {
             "post": {
-                "description": "Envia uma pergunta para o modelo local através do Ollama e retorna a resposta gerada.",
+                "description": "Envia uma pergunta para o modelo local através do Ollama.",
                 "consumes": [
                     "application/json"
                 ],

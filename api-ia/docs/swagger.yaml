@@ -35,8 +35,6 @@ info:
   contact:
     name: Matheus
   description: API para comunicação com modelos de IA locais através do Ollama.
-  license:
-    name: MIT
   termsOfService: http://swagger.io/terms/
   title: AI Ticket API
   version: "1.0"
@@ -45,8 +43,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Envia uma pergunta para o modelo local através do Ollama e retorna
-        a resposta gerada.
+      description: Envia uma pergunta para o modelo local através do Ollama.
       parameters:
       - description: Dados da solicitação
         in: body
