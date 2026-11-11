@@ -16,6 +16,20 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 
+// handleAsk godoc
+// @Summary      Enviar pergunta para IA
+// @Description  Envia uma pergunta para o modelo local através do Ollama.
+// @Tags         AI
+// @Accept       json
+// @Produce      json
+// @Param        request body dtos.AskRequest true "Dados da solicitação"
+// @Success      200 {object} dtos.AskResponse "Resposta gerada com sucesso"
+// @Failure      400 {object} dtos.ErrorResponse "JSON inválido ou campos obrigatórios ausentes"
+// @Failure      409 {object} dtos.ErrorResponse "Request ID já está em uso"
+// @Failure      499 {object} dtos.ErrorResponse "Geração cancelada"
+// @Failure      502 {object} dtos.ErrorResponse "Erro na comunicação com Ollama"
+// @Failure      504 {object} dtos.ErrorResponse "Tempo limite excedido"
+// @Router       /api/ask [post]
 func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request) {
 	var req dtos.AskRequest
 
@@ -73,6 +87,17 @@ func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// handleCancel godoc
+// @Summary      Cancelar requisição
+// @Description  Cancela uma geração em andamento com base no Request ID.
+// @Tags         AI
+// @Accept       json
+// @Produce      json
+// @Param        request body dtos.CancelRequest true "Identificador da requisição"
+// @Success      200 {object} map[string]string "Geração cancelada"
+// @Failure      400 {object} dtos.ErrorResponse "Request ID obrigatório"
+// @Failure      404 {object} dtos.ErrorResponse "Nenhuma geração em andamento com esse ID"
+// @Router       /api/cancel [post]
 func (s *Server) handleCancel(w http.ResponseWriter, r *http.Request) {
 	var req dtos.CancelRequest
 
